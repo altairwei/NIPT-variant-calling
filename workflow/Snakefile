@@ -16,7 +16,7 @@ samples = get_samples(fqlist)
 
 rule all:
     input:
-        expand(os.path.join(output_dir, "alignment", "{samid}.sorted.rmdup.realign.BQSR.cvg.bed.gz"), samid=[s[3] for s in samples])
+        expand(os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.realign.BQSR.cvg.bed.gz"), sample_id=[s[3] for s in samples])
 
 ##### Modules #####
 

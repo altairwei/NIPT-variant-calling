@@ -7,3 +7,4 @@ ref_index_prefix: "data/reference/Homo_sapiens_assembly38.fasta"
 gatk_bundle_dir: "data/reference"
 
 output_dir: output
+log_dir: log
