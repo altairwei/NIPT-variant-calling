@@ -1,22 +1,3 @@
-import datetime
-
-timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-
-configfile: "config/config.yml"
-
-output_dir = config["output_dir"]
-gatk_bundle_dir = config["gatk_bundle_dir"]
-ref = config["ref"]
-ref_index_prefix = config["ref_index_prefix"]
-
-common_params = {
-    "ref": ref,
-    "gatk_bundle_dir": gatk_bundle_dir
-}
-
-def get_log_path(sample_id):
-    return os.path.join(config["log_dir"], timestamp, f"{sample_id}.log")
-
 ### Step 1: Read alignment using bwa
 ### - Adjust the number of threads (-t) for bwa according to your cluster.
 ### - The -e 10 parameter makes indel detection more sensitive, though its impact is minimal.
@@ -29,11 +10,11 @@ rule Module_1_Alignment_Step_1_1:
     input:
         "data/{sample_id}.fq.gz"
     output:
-        os.path.join(output_dir, "alignment", "{sample_id}.sai")
+        temp(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sai"))
     log:
         get_log_path("{sample_id}")
     params:
-        ref_index_prefix=ref_index_prefix
+        ref_index_prefix=REF_INDEX_PREFIX
     threads: config.get("threads", 8)
     shell:
         "bwa aln -e 10 -t {threads} -i 5 -q 0 {params.ref_index_prefix} {input} > {output} 2>> {log}"
@@ -44,15 +25,15 @@ rule Module_1_Alignment_Step_1_2:
     (typically 35 bp) to the latest human genome reference.
     """
     input:
-        fq="data/{cid}_{lid}_{snn}.fq.gz",
-        sai=os.path.join(output_dir, "alignment", "{cid}_{lid}_{snn}.sai")
+        fq="data/{cid}{lid}{snn}.fq.gz",
+        sai=os.path.join(OUTPUT_DIR, "alignments", "{cid}{lid}{snn}.sai")
     output:
-        os.path.join(output_dir, "alignment", "{cid}_{lid}_{snn}.bam")
+        temp(os.path.join(OUTPUT_DIR, "alignments", "{cid}{lid}{snn}.bam"))
     log:
-        get_log_path("{cid}_{lid}_{snn}")
+        get_log_path("{cid}{lid}{snn}")
     params:
-        ref_index_prefix=ref_index_prefix,
-        read_group="@RG\\tID:{cid}_{lid}\\tPL:COMPLETE\\tSM:{cid}_{lid}_{snn}"
+        ref_index_prefix=REF_INDEX_PREFIX,
+        read_group="@RG\\tID:{cid}_{lid}\\tPL:COMPLETE\\tSM:{cid}{lid}{snn}"
     shell:
         """
         bwa samse -r "{params.read_group}" {params.ref_index_prefix} {input.sai} {input.fq} 2>> {log} \
@@ -64,9 +45,9 @@ rule Module_1_Alignment_Step_1_3:
     The alignment reads were then sorted using Samtools.
     """
     input:
-        os.path.join(output_dir, "alignment", "{sample_id}.bam")
+        os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.bam")
     output:
-        os.path.join(output_dir, "alignment", "{sample_id}.sorted.bam")
+        temp(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.bam"))
     threads: config.get("threads", 8)
     log:
         get_log_path("{sample_id}")
@@ -78,9 +59,9 @@ rule Module_1_Alignment_Step_1_4:
     Removal of potential PCR duplicates.
     """
     input:
-        os.path.join(output_dir, "alignment", "{sample_id}.sorted.bam")
+        os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.bam")
     output:
-        os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.bam")
+        temp(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.bam"))
     log:
         get_log_path("{sample_id}")
     shell:
@@ -88,9 +69,9 @@ rule Module_1_Alignment_Step_1_4:
 
 rule Module_1_Alignment_Step_1_5:
     input:
-        os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.bam")
+        os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.bam")
     output:
-        os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.bam.bai")
+        temp(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.bam.bai"))
     shell:
         "samtools index {input}"
 
@@ -102,10 +83,10 @@ rule Module_1_Alignment_Step_2_1:
     Use GATK to realign indels in the NIPT reads based on known indel information from prior studies.
     """
     input:
-        bam=os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.bam"),
-        bai=os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.bam.bai")
+        bam=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.bam"),
+        bai=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.bam.bai")
     output:
-        os.path.join(output_dir, "alignment", "{sample_id}.indel_target_intervals.list")
+        temp(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.indel_target_intervals.list"))
     params:
         **common_params
     log:
@@ -123,11 +104,11 @@ rule Module_1_Alignment_Step_2_1:
 
 rule Module_1_Alignment_Step_2_2:
     input:
-        bam=os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.bam"),
-        bai=os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.bam.bai"),
-        indel=os.path.join(output_dir, "alignment", "{sample_id}.indel_target_intervals.list")
+        bam=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.bam"),
+        bai=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.bam.bai"),
+        indel=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.indel_target_intervals.list")
     output:
-        os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.realign.bam")
+       temp(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.bam"))
     params:
         **common_params
     log:
@@ -147,9 +128,9 @@ rule Module_1_Alignment_Step_2_2:
 
 rule Module_1_Alignment_Step_2_3:
     input:
-        os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.realign.bam")
+        os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.bam")
     output:
-        os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.realign.bam.bai")
+        temp(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.bam.bai"))
     shell:
         "samtools index {input}"
 
@@ -161,10 +142,10 @@ rule Module_1_Alignment_Step_3_1:
     dbsnp_146.hg38.vcf.gz is available in http://ftp.cbi.pku.edu.cn/pub/mirror/GATK/hg38/
     """
     input:
-        bam=os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.realign.bam"),
-        bai=os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.realign.bam.bai")
+        bam=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.bam"),
+        bai=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.bam.bai")
     output:
-        os.path.join(output_dir, "alignment", "{sample_id}.recal_data.table")
+        temp(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.recal_data.table"))
     params:
         **common_params
     log:
@@ -187,11 +168,11 @@ rule Module_1_Alignment_Step_3_2:
     Recalibrate base quality in the NIPT reads, using known SNPs and indels as references.
     """
     input:
-        tbl=os.path.join(output_dir, "alignment", "{sample_id}.recal_data.table"),
-        bam=os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.realign.bam"),
-        bai=os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.realign.bam.bai")
+        tbl=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.recal_data.table"),
+        bam=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.bam"),
+        bai=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.bam.bai")
     output:
-        os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.realign.BQSR.bam")
+        os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.BQSR.bam")
     params:
         **common_params
     log:
@@ -204,14 +185,15 @@ rule Module_1_Alignment_Step_3_2:
             -R {params.ref} \
             --BQSR {input.tbl} \
             -I {input.bam} \
+            --disable_bam_indexing \
             -o {output} 2>> {log}
         """
 
 rule Module_1_Alignment_Step_3_3:
     input:
-        os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.realign.BQSR.bam")
+        os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.BQSR.bam")
     output:
-        os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.realign.BQSR.bam.bai")
+        os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.BQSR.bam.bai")
     shell:
         "samtools index {input}"
 
@@ -222,10 +204,10 @@ rule Module_1_Statistics_Step_4_1:
     Use Samtools to calculate alignment statistics for the alignment files.
     """
     input:
-        bam=os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.realign.BQSR.bam"),
-        bai=os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.realign.BQSR.bam.bai")
+        bam=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.BQSR.bam"),
+        bai=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.BQSR.bam.bai")
     output:
-        os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.realign.BQSR.bamstats")
+        os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.BQSR.bamstats")
     log:
         get_log_path("{sample_id}")
     shell:
@@ -236,11 +218,11 @@ rule Module_1_Statistics_Step_4_2:
     Use Bedtools to calculate alignment statistics for the alignment files.
     """
     input:
-        bam=os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.realign.BQSR.bam"),
-        bai=os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.realign.BQSR.bam.bai")
+        bam=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.BQSR.bam"),
+        bai=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.BQSR.bam.bai")
     output:
-        bgzip=os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.realign.BQSR.cvg.bed.gz"),
-        tabix=os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.realign.BQSR.cvg.bed.gz.tbi")
+        bgzip=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.BQSR.cvg.bed.gz"),
+        tabix=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.BQSR.cvg.bed.gz.tbi")
     log:
         get_log_path("{sample_id}")
     shell:

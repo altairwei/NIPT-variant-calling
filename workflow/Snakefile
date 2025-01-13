@@ -1,23 +1,12 @@
-configfile: "config/config.yml"
-
-fqlist = config["fqlist"]
-output_dir = config["output_dir"]
-
-# Get sample infor from falist
-def get_samples(fqlist_path):
-    samples = []
-    with open(fqlist_path, "r") as f:
-        for line in f:
-            fq, cid, lid, samid = line.strip().split()
-            samples.append((fq, cid, lid, samid))
-    return samples
-
-samples = get_samples(fqlist)
+include: "rules/common.smk"
 
 rule all:
     input:
-        expand(os.path.join(output_dir, "alignment", "{sample_id}.sorted.rmdup.realign.BQSR.cvg.bed.gz"), sample_id=[s[3] for s in samples])
+        expand(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.BQSR.cvg.bed.gz"), sample_id=[s[3] for s in SAMPLES]),
+        expand(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.BQSR.bamstats"), sample_id=[s[3] for s in SAMPLES]),
+        os.path.join(OUTPUT_DIR, "calls", "all.bam.list")
 
 ##### Modules #####
 
 include: "rules/alignment.smk"
+include: "rules/calling.smk"
