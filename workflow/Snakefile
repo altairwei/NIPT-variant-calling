@@ -4,7 +4,8 @@ rule all:
     input:
         expand(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.BQSR.cvg.bed.gz"), sample_id=[s[3] for s in SAMPLES]),
         expand(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.BQSR.bamstats"), sample_id=[s[3] for s in SAMPLES]),
-        os.path.join(OUTPUT_DIR, "calls", "all.bam.list")
+        expand(os.path.join(OUTPUT_DIR, "calls", "{chr_id}.vcf.gz.tbi"), chr_id=[f"chr{i}" for i in range(1, 23)] + ["chrX", "chrY"]),
+        expand(os.path.join(OUTPUT_DIR, "calls", "{chr_id}.cvg.tsv.gz.tbi"), chr_id=[f"chr{i}" for i in range(1, 23)] + ["chrX", "chrY"])
 
 ##### Modules #####
 
