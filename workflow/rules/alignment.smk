@@ -33,7 +33,7 @@ rule Module_1_Alignment_Step_1_2:
         get_log_path("{cid}{lid}{snn}")
     params:
         ref_index_prefix=REF_INDEX_PREFIX,
-        read_group="@RG\\tID:{cid}_{lid}\\tPL:COMPLETE\\tSM:{cid}{lid}{snn}"
+        read_group=r"@RG\tID:{cid}_{lid}\tPL:COMPLETE\tSM:{cid}{lid}{snn}"
     shell:
         """
         bwa samse -r "{params.read_group}" {params.ref_index_prefix} {input.sai} {input.fq} 2>> {log} \
@@ -89,11 +89,13 @@ rule Module_1_Alignment_Step_2_1:
         temp(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.indel_target_intervals.list"))
     params:
         **common_params
+    resources:
+        mem_mb=15*1024
     log:
         get_log_path("{sample_id}")
     shell:
         """
-        java -Xmx15g -jar $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar \
+        gatk3 -Xmx{resources.mem_mb}m \
             -T RealignerTargetCreator \
             -R {params.ref} \
             -I {input.bam} \
@@ -111,11 +113,13 @@ rule Module_1_Alignment_Step_2_2:
        temp(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.bam"))
     params:
         **common_params
+    resources:
+        mem_mb=15*1024
     log:
         get_log_path("{sample_id}")
     shell:
         """
-        java -Xmx15g -jar $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar \
+        gatk3 -Xmx{resources.mem_mb}m \
             -T IndelRealigner \
             -R {params.ref} \
             -I {input.bam} \
@@ -148,11 +152,13 @@ rule Module_1_Alignment_Step_3_1:
         temp(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.recal_data.table"))
     params:
         **common_params
+    resources:
+        mem_mb=2*1024
     log:
         get_log_path("{sample_id}")
     shell:
         """
-        java -jar $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar \
+        gatk3 -Xmx{resources.mem_mb}m \
             -T BaseRecalibrator \
             -nct 8 \
             -R {params.ref} \
@@ -172,15 +178,14 @@ rule Module_1_Alignment_Step_3_2:
         bam=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.bam"),
         bai=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.bam.bai")
     output:
-        os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.BQSR.bam")
+        protected(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.realign.BQSR.bam"))
     params:
         **common_params
     log:
         get_log_path("{sample_id}")
     shell:
         """
-        java -jar $CONDA_PREFIX/opt/gatk-3.8/GenomeAnalysisTK.jar \
-            -T PrintReads \
+        gatk3 -T PrintReads \
             -nct 8 \
             -R {params.ref} \
             --BQSR {input.tbl} \
