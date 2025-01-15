@@ -1,4 +1,7 @@
 rule Module_2_Calling_Step_1:
+    """
+    Create a list of all the bam files.
+    """
     input:
         bam=expand(os.path.join(OUTPUT_DIR, "alignments", 
             "{sample_id}.sorted.rmdup.realign.BQSR.bam"), sample_id=[s[3] for s in SAMPLES]),
@@ -12,6 +15,14 @@ rule Module_2_Calling_Step_1:
                 f.write(bam_file + "\n")
 
 rule Module_2_Calling_Step_2:
+    """
+    In Module 2, we begin conducting some analyses in parallel. In the example,
+    we process the data and perform variant detection and allele frequency 
+    estimation in 5 million basepair non-overlapping windows. To facilitate this
+    parallelization, we use the pipeline generator create_pipeline.py, which
+    distributes the computational tasks based on the --delta parameter across a 
+    specific chromosome defined by the -c parameter.
+    """
     input:
         os.path.join(OUTPUT_DIR, "calls", "all.bam.list")
     output:
@@ -82,13 +93,3 @@ rule Module_2_Calling_Step_3:
 
         tabix -p vcf {output.vcf}
         """
-
-rule Module_2_Calling_Step_4:
-    input:
-        cvg=lambda wildcards: generate_regional_vcf_files(wildcards, ".cvg.tsv.gz"),
-        tbi=lambda wildcards: generate_regional_vcf_files(wildcards, ".cvg.tsv.gz.tbi")
-    output:
-        cvg=protected(os.path.join(OUTPUT_DIR, "calls", "{chr_id}.cvg.tsv.gz")),
-        tbi=protected(os.path.join(OUTPUT_DIR, "calls", "{chr_id}.cvg.tsv.gz.tbi"))
-    shell:
-        "bedtools unionbedg -i {input} > {output.cvg} && tabix -p bed {output.cvg}"
