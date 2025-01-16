@@ -1,19 +1,3 @@
-rule Module_2_Calling_Step_1:
-    """
-    Create a list of all the bam files.
-    """
-    input:
-        bam=expand(os.path.join(OUTPUT_DIR, "alignments", 
-            "{sample_id}.sorted.rmdup.realign.BQSR.bam"), sample_id=[s[3] for s in SAMPLES]),
-        bai=expand(os.path.join(OUTPUT_DIR, "alignments",
-            "{sample_id}.sorted.rmdup.realign.BQSR.bam.bai"), sample_id=[s[3] for s in SAMPLES])
-    output:
-        temp(os.path.join(OUTPUT_DIR, "calls", "all.bam.list"))
-    run:
-        with open(output[0], "w") as f:
-            for bam_file in input.bam:
-                f.write(bam_file + "\n")
-
 rule Module_2_Calling_Step_2:
     """
     In Module 2, we begin conducting some analyses in parallel. In the example,
@@ -54,31 +38,12 @@ rule Module_2_Calling_Step_2:
             --output-cvg {output.cvg} > {log}
         """
 
-def generate_regional_vcf_files(wildcards, suffix=".vcf.gz"):
-    delta = 5000000
-    in_fai = config["ref_fai"]
-    chroms = wildcards.chr_id
-
-    with open(in_fai) as fh:
-        for r in fh:
-            col = r.strip().split()
-            chr_id = col[0]
-            chr_length = int(col[1])
-
-            if chroms is not None and len(chroms):
-                if chr_id not in chroms:
-                    continue
-
-            for i in range(0, chr_length, delta):
-                start = i + 1
-                end = i + delta if i + delta <= chr_length else chr_length
-                yield os.path.join(OUTPUT_DIR, "calls", f"{chr_id}_{start}_{end}{suffix}")
-
-
 rule Module_2_Calling_Step_3:
     input:
-        vcf=lambda wildcards: generate_regional_vcf_files(wildcards, ".vcf.gz"),
-        tbi=lambda wildcards: generate_regional_vcf_files(wildcards, ".vcf.gz.tbi")
+        vcf=lambda wildcards: generate_regional_vcf_files(
+            wildcards.chr_id, os.path.join(OUTPUT_DIR, "calls"), ".vcf.gz"),
+        tbi=lambda wildcards: generate_regional_vcf_files(
+            wildcards.chr_id, os.path.join(OUTPUT_DIR, "calls"), ".vcf.gz.tbi")
     output:
         vcf=protected(os.path.join(OUTPUT_DIR, "calls", "{chr_id}.vcf.gz")),
         tbi=protected(os.path.join(OUTPUT_DIR, "calls", "{chr_id}.vcf.gz.tbi"))

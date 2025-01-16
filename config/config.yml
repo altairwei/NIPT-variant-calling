@@ -1,11 +1,15 @@
 fqlist: "data/fq.list"
 
-threads: 8
+# Please verify the platform that generated the sequencing files, as different
+# sequencing platforms require specific names in the 'platform' argument.
+# See https://samtools.github.io/hts-specs/SAMv1.pdf for details.
+platform: ILLUMINA
 
 ref: "data/reference/Homo_sapiens_assembly38.fasta"
 ref_fai: "data/reference/Homo_sapiens_assembly38.fasta.fai"
 ref_index_prefix: "data/reference/Homo_sapiens_assembly38.fasta"
 gatk_bundle_dir: "data/reference"
+chunk_size: 5000000
 
 output_dir: output
 log_dir: log
