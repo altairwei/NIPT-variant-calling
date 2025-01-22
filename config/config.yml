@@ -1,5 +1,8 @@
 fqlist: "data/fq.list"
 
+output_dir: output
+log_dir: log
+
 # Please verify the platform that generated the sequencing files, as different
 # sequencing platforms require specific names in the 'platform' argument.
 # See https://samtools.github.io/hts-specs/SAMv1.pdf for details.
@@ -9,7 +12,24 @@ ref: "data/reference/Homo_sapiens_assembly38.fasta"
 ref_fai: "data/reference/Homo_sapiens_assembly38.fasta.fai"
 ref_index_prefix: "data/reference/Homo_sapiens_assembly38.fasta"
 gatk_bundle_dir: "data/reference"
+
+# The entire genome is divided into uniformly sized segments. Subsequently, 
+# genotype imputation is carried out on each segment individually.
+#
+# Chunk_size, represents the size of the segments into which we want to divide 
+# the genome. Larger chunks will require more computing resources and time. It
+# is advisable to test different chunk sizes before starting to determine the 
+# optimal parameters.
 chunk_size: 5000000
 
-output_dir: output
-log_dir: log
+# Skip positions in these chromosomal regions because there are no SNPs in these
+# regions according to the 1000G reference panel.
+exclude_regions:
+  - chr21:1-5000000
+  - chr22:1-10000000
+  - chr9:50000001-60000000
+  - chr16:40000001-45000000
+  - chr14:1-15000000
+  - chr1:130000001-140000000
+  - chr15:1-15000000
+  - chr13:1-15000000

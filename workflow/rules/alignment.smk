@@ -5,6 +5,8 @@ rule Module_1_QualityControl:
         fq=temp(os.path.join(OUTPUT_DIR, "clean", "{sample_id}.clean.fq.gz")),
         html=temp(os.path.join(OUTPUT_DIR, "clean", "{sample_id}.html")),
         json=temp(os.path.join(OUTPUT_DIR, "clean", "{sample_id}.json"))
+    log:
+        get_log_path("{sample_id}")
     shell:
         """
         fastp -i {input} -o {output.fq} \
@@ -17,7 +19,7 @@ rule Module_1_QualityControl:
             --thread=16 \
             -j {output.json} \
             -h {output.html} \
-            -R {wildcards.sample_id}
+            -R {wildcards.sample_id} 2> {log}
         """
 
 rule Module_1_Alignment_Step_1:
