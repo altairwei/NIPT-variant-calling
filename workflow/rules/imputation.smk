@@ -67,9 +67,6 @@ rule Module_3_RunSTITCH_Step_1:
         """
 
 CHROM_SEGMENTS=list(generate_chromosome_segments())
-chr_list = [seg[0] for seg in CHROM_SEGMENTS]
-start_list = [seg[1] for seg in CHROM_SEGMENTS]
-end_list = [seg[2] for seg in CHROM_SEGMENTS]
 
 rule Module_3_RunSTITCH_Step_2:
     """
@@ -79,12 +76,12 @@ rule Module_3_RunSTITCH_Step_2:
     on these genomes is complex.
     """
     input:
-        vcf=expand(os.path.join(OUTPUT_DIR, "imputation",
-                "{chrom}", "{chrom}_{start}_{end}", "stitch.{chrom}.{start}.{end}.vcf.gz"),
-                zip, chrom=chr_list, start=start_list, end = end_list),
-        tbi=expand(os.path.join(OUTPUT_DIR, "imputation",
-                "{chrom}", "{chrom}_{start}_{end}", "stitch.{chrom}.{start}.{end}.vcf.gz.tbi"),
-                zip, chrom=chr_list, start=start_list, end = end_list)
+        vcf=[os.path.join(OUTPUT_DIR, "imputation",
+                f"{chrom}", f"{chrom}_{start}_{end}", f"stitch.{chrom}.{start}.{end}.vcf.gz")
+                    for chrom, start, end in CHROM_SEGMENTS],
+        tbi=[os.path.join(OUTPUT_DIR, "imputation",
+                f"{chrom}", f"{chrom}_{start}_{end}", f"stitch.{chrom}.{start}.{end}.vcf.gz.tbi")
+                    for chrom, start, end in CHROM_SEGMENTS]
     output:
         vcf=protected(os.path.join(OUTPUT_DIR, "imputation", "STITCH.vcf.gz")),
         tbi=protected(os.path.join(OUTPUT_DIR, "imputation", "STITCH.vcf.gz.tbi"))
