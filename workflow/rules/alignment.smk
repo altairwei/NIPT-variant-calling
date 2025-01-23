@@ -153,6 +153,27 @@ rule Module_1_PostRecalibration:
     shell:
         "samtools index {input}"
 
+rule Module_1_ListSamples:
+    """
+    Create a list of all the bam files.
+    """
+    input:
+        bam=expand(os.path.join(OUTPUT_DIR, "alignments", 
+            "{sample_id}.sorted.rmdup.BQSR.bam"), sample_id=[s[3] for s in SAMPLES]),
+        bai=expand(os.path.join(OUTPUT_DIR, "alignments",
+            "{sample_id}.sorted.rmdup.BQSR.bam.bai"), sample_id=[s[3] for s in SAMPLES])
+    output:
+        bamlist=temp(os.path.join(OUTPUT_DIR, "all.bam.list")),
+        snlist=temp(os.path.join(OUTPUT_DIR, "all.samplename.list"))
+    run:
+        with open(output.bamlist, "w") as f_bam:
+            for bam_file in input.bam:
+                f_bam.write(bam_file + "\n")
+        with open(output.snlist, "w") as f_sample:
+            for sample in SAMPLES:
+                sample_id = sample[3]
+                f_sample.write(sample_id + "\n")
+
 rule Module_1_Statistics_Step_1:
     """
     Use Samtools to calculate alignment statistics for the alignment files.

@@ -1,24 +1,3 @@
-rule Module_3_ListSamples:
-    """
-    Create a list of all the bam files.
-    """
-    input:
-        bam=expand(os.path.join(OUTPUT_DIR, "alignments", 
-            "{sample_id}.sorted.rmdup.BQSR.bam"), sample_id=[s[3] for s in SAMPLES]),
-        bai=expand(os.path.join(OUTPUT_DIR, "alignments",
-            "{sample_id}.sorted.rmdup.BQSR.bam.bai"), sample_id=[s[3] for s in SAMPLES])
-    output:
-        bamlist=temp(os.path.join(OUTPUT_DIR, "all.bam.list")),
-        snlist=temp(os.path.join(OUTPUT_DIR, "all.samplename.list"))
-    run:
-        with open(output.bamlist, "w") as f_bam:
-            for bam_file in input.bam:
-                f_bam.write(bam_file + "\n")
-        with open(output.snlist, "w") as f_sample:
-            for sample in SAMPLES:
-                sample_id = sample[3]
-                f_sample.write(sample_id + "\n")
-
 rule Module_3_GeneratePosfile:
     input:
         "data/refpanel/20220422_3202_phased_SNV_INDEL_SV/"
@@ -85,7 +64,7 @@ rule Module_3_RunSTITCH_Step_2:
     output:
         vcf=protected(os.path.join(OUTPUT_DIR, "imputation", "STITCH.vcf.gz")),
         tbi=protected(os.path.join(OUTPUT_DIR, "imputation", "STITCH.vcf.gz.tbi"))
-    threads: 4
+    threads: 16
     log: get_log_path("bcftools_concat_STITCH")
     shell:
         """

@@ -20,7 +20,11 @@ wildcard_constraints:
     sample_id="CL1\d+L\d+",
     cid="CL1\d\d\d\d",
     lid="L\d\d",
-    snn="\d\d"
+    snn="\d\d",
+    start="\d+",
+    end="\d+",
+    chr_id="chr.+",
+    chrom="chr.+"
 
 def get_log_path(sample_id):
     return os.path.join(config["log_dir"], timestamp, f"{sample_id}.log")
@@ -36,7 +40,7 @@ def get_samples(fqlist_path):
 
 SAMPLES = get_samples(FQLIST)
 
-def generate_chromosome_segments():
+def generate_chromosome_segments(exclude=True):
     """
     Generate chromosome segments as (chr_id, start, end) tuples, excluding specified regions.
 
@@ -52,7 +56,7 @@ def generate_chromosome_segments():
     """
     delta = config["chunk_size"]
     in_fai = config["ref_fai"]
-    exclude_regions = config["exclude_regions"]
+    exclude_regions = config["exclude_regions"] if exclude else None
 
     # Include all chromosomes
     chroms = [f"chr{i}" for i in range(1, 23)] + ["chrX"]
@@ -110,3 +114,4 @@ def generate_chromosome_segments():
                     end = min(current_start + delta - 1, chr_length)
                     yield (chr_id, current_start, end)
                     current_start = end + 1
+
