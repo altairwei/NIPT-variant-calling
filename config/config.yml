@@ -8,10 +8,9 @@ log_dir: log
 # See https://samtools.github.io/hts-specs/SAMv1.pdf for details.
 platform: ILLUMINA
 
-ref: "data/reference/Homo_sapiens_assembly38.fasta"
-ref_fai: "data/reference/Homo_sapiens_assembly38.fasta.fai"
-ref_index_prefix: "data/reference/Homo_sapiens_assembly38.fasta"
-gatk_bundle_dir: "data/reference"
+ref: data/reference/Homo_sapiens_assembly38.fasta
+ref_fai: data/reference/Homo_sapiens_assembly38.fasta.fai
+gatk_bundle_dir: data/reference
 
 # The entire genome is divided into uniformly sized segments. Subsequently, 
 # genotype imputation is carried out on each segment individually.

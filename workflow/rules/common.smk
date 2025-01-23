@@ -9,7 +9,6 @@ FQLIST = config["fqlist"]
 PLATFORM=config["platform"]
 GATK_BUNDLE_DIR = config["gatk_bundle_dir"]
 REF = config["ref"]
-REF_INDEX_PREFIX = config["ref_index_prefix"]
 
 common_params = {
     "ref": REF,

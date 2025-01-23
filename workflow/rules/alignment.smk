@@ -35,10 +35,10 @@ rule Module_1_Alignment_Step_1:
     log:
         get_log_path("{sample_id}")
     params:
-        ref_index_prefix=REF_INDEX_PREFIX
+        ref=REF
     threads: 4
     shell:
-        "bwa aln -e 10 -t {threads} -i 5 -q 0 {params.ref_index_prefix} {input} > {output} 2>> {log}"
+        "bwa aln -e 10 -t {threads} -i 5 -q 0 {params.ref} {input} > {output} 2>> {log}"
 
 rule Module_1_Alignment_Step_2:
     """
@@ -53,11 +53,11 @@ rule Module_1_Alignment_Step_2:
     log:
         get_log_path("{sample_id}")
     params:
-        ref_index_prefix=REF_INDEX_PREFIX,
+        ref=REF,
         read_group=f"@RG\\tID:{{sample_id}}\\tPL:{PLATFORM}\\tSM:{{sample_id}}"
     shell:
         """
-        bwa samse -r {params.read_group:q} {params.ref_index_prefix} {input.sai} {input.fq} 2>> {log} \
+        bwa samse -r {params.read_group:q} {params.ref} {input.sai} {input.fq} 2>> {log} \
             | samtools view -h -Sb - > {output}
         """
 
