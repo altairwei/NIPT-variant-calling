@@ -11,6 +11,15 @@ rule Module_3_GeneratePosfile:
         zcat {input} | grep -v "#" | awk '{params.scr}' > {output}
         """
 
+rule Module_3_ConcatPosfiles:
+    input:
+        expand(os.path.join(OUTPUT_DIR, "imputation", "{chrom}", "Panel.{chrom}.pos.txt"),
+            chrom=[f"chr{i}" for i in range(1, 23)] + ["chrX"])
+    output:
+        os.path.join(OUTPUT_DIR, "imputation", "Panel.allchrom.pos.txt")
+    shell:
+        "cat {input} > {output}"
+
 rule Module_3_RunSTITCH_Step_1:
     """
     Given the large sample size used in STITCH, failing to segment chromosome 

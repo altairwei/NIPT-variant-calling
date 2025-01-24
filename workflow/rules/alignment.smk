@@ -164,15 +164,18 @@ rule Module_1_ListSamples:
             "{sample_id}.sorted.rmdup.BQSR.bam.bai"), sample_id=[s[3] for s in SAMPLES])
     output:
         bamlist=temp(os.path.join(OUTPUT_DIR, "all.bam.list")),
-        snlist=temp(os.path.join(OUTPUT_DIR, "all.samplename.list"))
+        snlist=temp(os.path.join(OUTPUT_DIR, "all.samplename.list")),
+        sexlist=os.path.join(OUTPUT_DIR, "all.samplesex.list")
     run:
         with open(output.bamlist, "w") as f_bam:
             for bam_file in input.bam:
                 f_bam.write(bam_file + "\n")
-        with open(output.snlist, "w") as f_sample:
+        with open(output.snlist, "w") as f_sample, open(output.sexlist, "w") as f_sex:
             for sample in SAMPLES:
                 sample_id = sample[3]
                 f_sample.write(sample_id + "\n")
+                f_sex.write(sample_id + "\t" + "Female\n")
+
 
 rule Module_1_Statistics_Step_1:
     """
