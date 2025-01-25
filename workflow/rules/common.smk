@@ -28,13 +28,13 @@ wildcard_constraints:
 def get_log_path(sample_id):
     return os.path.join(config["log_dir"], timestamp, f"{sample_id}.log")
 
-# Get sample infor from falist
 def get_samples(fqlist_path):
     samples = []
     with open(fqlist_path, "r") as f:
         for line in f:
-            fq, cid, lid, samid = line.strip().split()
-            samples.append((fq, cid, lid, samid))
+            stripped_line = line.strip()
+            if stripped_line:
+                samples.append(stripped_line)
     return samples
 
 SAMPLES = get_samples(FQLIST)

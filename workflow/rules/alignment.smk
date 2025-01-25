@@ -1,27 +1,3 @@
-rule Module_1_QualityControl:
-    input:
-        "data/{sample_id}.fq.gz"
-    output:
-        fq=temp(os.path.join(OUTPUT_DIR, "clean", "{sample_id}.clean.fq.gz")),
-        html=temp(os.path.join(OUTPUT_DIR, "clean", "{sample_id}.html")),
-        json=temp(os.path.join(OUTPUT_DIR, "clean", "{sample_id}.json"))
-    log:
-        get_log_path("{sample_id}")
-    shell:
-        """
-        fastp -i {input} -o {output.fq} \
-            --qualified_quality_phred=5 \
-            --unqualified_percent_limit=50 \
-            --n_base_limit=10 \
-            --adapter_sequence="AAGTCGGAGGCCAAGCGGTCTTAGGAAGACAA" \
-            --adapter_sequence_r2="AAGTCGGATCGTAGCCATGTCGTTCTGTGAGCCAAGGAGTTG" \
-            --disable_trim_poly_g \
-            --thread=16 \
-            -j {output.json} \
-            -h {output.html} \
-            -R {wildcards.sample_id} 2> {log}
-        """
-
 rule Module_1_Alignment_Step_1:
     """
     Used the BWA single-end alignment model to map the single-end reads 
@@ -159,9 +135,9 @@ rule Module_1_ListSamples:
     """
     input:
         bam=expand(os.path.join(OUTPUT_DIR, "alignments", 
-            "{sample_id}.sorted.rmdup.BQSR.bam"), sample_id=[s[3] for s in SAMPLES]),
+            "{sample_id}.sorted.rmdup.BQSR.bam"), sample_id=SAMPLES),
         bai=expand(os.path.join(OUTPUT_DIR, "alignments",
-            "{sample_id}.sorted.rmdup.BQSR.bam.bai"), sample_id=[s[3] for s in SAMPLES])
+            "{sample_id}.sorted.rmdup.BQSR.bam.bai"), sample_id=SAMPLES)
     output:
         bamlist=temp(os.path.join(OUTPUT_DIR, "all.bam.list")),
         snlist=temp(os.path.join(OUTPUT_DIR, "all.samplename.list")),
@@ -171,8 +147,7 @@ rule Module_1_ListSamples:
             for bam_file in input.bam:
                 f_bam.write(bam_file + "\n")
         with open(output.snlist, "w") as f_sample, open(output.sexlist, "w") as f_sex:
-            for sample in SAMPLES:
-                sample_id = sample[3]
+            for sample_id in SAMPLES:
                 f_sample.write(sample_id + "\n")
                 f_sex.write(sample_id + "\t" + "Female\n")
 

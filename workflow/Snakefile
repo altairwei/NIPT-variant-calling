@@ -2,14 +2,18 @@ include: "rules/common.smk"
 
 rule all:
     input:
-        expand(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.BQSR.cvg.bed.gz"), sample_id=[s[3] for s in SAMPLES]),
-        expand(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.BQSR.bamstats"), sample_id=[s[3] for s in SAMPLES]),
+        os.path.join(OUTPUT_DIR, "report", "raw.multiqc.html"),
+        os.path.join(OUTPUT_DIR, "report", "clean.multiqc.html"),
         os.path.join(OUTPUT_DIR, "imputation", "STITCH.vcf.gz"),
-        os.path.join(OUTPUT_DIR, "calls", "BaseVarC.vcf.gz"),
-        os.path.join(OUTPUT_DIR, "GWAS", "gwas.pca")
+        os.path.join(OUTPUT_DIR, "calls", "BaseVarC.vcf.gz")
+
+rule report:
+    input:
+        os.path.join(OUTPUT_DIR, "report", "raw.multiqc.html")
 
 ##### Modules #####
 
+include: "rules/qc.smk"
 include: "rules/alignment.smk"
 include: "rules/calling.smk"
 include: "rules/imputation.smk"
