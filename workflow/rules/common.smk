@@ -5,7 +5,7 @@ timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 configfile: "config/config.yml"
 
 OUTPUT_DIR = config["output_dir"]
-FQLIST = config["fqlist"]
+FQLIST = config["sample_list"]
 PLATFORM=config["platform"]
 GATK_BUNDLE_DIR = config["gatk_bundle_dir"]
 REF = config["ref"]
@@ -16,10 +16,6 @@ common_params = {
 }
 
 wildcard_constraints:
-    sample_id="CL1\d+L\d+",
-    cid="CL1\d\d\d\d",
-    lid="L\d\d",
-    snn="\d\d",
     start="\d+",
     end="\d+",
     chr_id="chr.+",
