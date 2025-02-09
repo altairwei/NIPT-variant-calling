@@ -41,30 +41,6 @@ rule Module_1_Raw_MultiQC:
             {params.searchdirs} > {log} 2> {log}
         """
 
-rule Module_1_QualityControl:
-    input:
-        config["file_pattern"]
-    output:
-        fq=temp(os.path.join(OUTPUT_DIR, "clean", "{sample_id}.clean.fq.gz")),
-        html=temp(os.path.join(OUTPUT_DIR, "clean", "{sample_id}.html")),
-        json=temp(os.path.join(OUTPUT_DIR, "clean", "{sample_id}.json"))
-    log:
-        get_log_path("{sample_id}")
-    shell:
-        """
-        fastp -i {input} -o {output.fq} \
-            --qualified_quality_phred=5 \
-            --unqualified_percent_limit=50 \
-            --n_base_limit=10 \
-            --adapter_sequence="AAGTCGGAGGCCAAGCGGTCTTAGGAAGACAA" \
-            --adapter_sequence_r2="AAGTCGGATCGTAGCCATGTCGTTCTGTGAGCCAAGGAGTTG" \
-            --disable_trim_poly_g \
-            --thread=16 \
-            -j {output.json} \
-            -h {output.html} \
-            -R {wildcards.sample_id} 2> {log}
-        """
-
 rule Module_1_Clean_MultiQC:
     input:
         expand(os.path.join(OUTPUT_DIR, "clean",

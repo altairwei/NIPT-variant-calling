@@ -5,7 +5,7 @@ rule Module_1_Alignment_Step_1:
     makes indel detection more sensitive, though its impact is minimal.
     """
     input:
-        os.path.join(OUTPUT_DIR, "clean", "{sample_id}.clean.fq.gz")
+        config["file_pattern"]
     output:
         temp(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sai"))
     log:
@@ -22,7 +22,7 @@ rule Module_1_Alignment_Step_2:
     (typically 35 bp) to the latest human genome reference.
     """
     input:
-        fq=os.path.join(OUTPUT_DIR, "clean", "{sample_id}.clean.fq.gz"),
+        fq=config["file_pattern"],
         sai=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sai")
     output:
         temp(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.bam"))
