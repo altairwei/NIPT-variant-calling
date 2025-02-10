@@ -2,37 +2,43 @@
 
 ### Human reference genome hg38 (GRCh38)
 
+Download the analysis set of hg38:
+
 ```shell
-gsutil -m cp \
-  "gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.dict" \
-  "gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.fasta" \
-  "gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.fasta.64.alt" \
-  "gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.fasta.64.amb" \
-  "gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.fasta.64.ann" \
-  "gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.fasta.64.bwt" \
-  "gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.fasta.64.pac" \
-  "gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.fasta.64.sa" \
-  "gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.fasta.fai" \
-  data/gatk
+wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/seqs_for_alignment_pipelines.ucsc_ids/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.{gz,fai,bwa_index.tar.gz}
+```
+
+Create GATK dictionary:
+
+```shell
+gatk CreateSequenceDictionary -R GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
 ```
 
 ### GATK resource bundle
+
+Download the latest dbSNP:
+
+```shell
+wget https://ftp.ncbi.nih.gov/snp/latest_release/VCF/GCF_000001405.40.gz{,.md5}
+md5sum -c GCF_000001405.40.gz*.md5
+```
+
+Convert contig IDs to UCSC using [chromToUcsc](http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/chromToUcsc):
+
+```shell
+chromToUcsc --get hg38
+gunzip -c GCF_000001405.40.gz | chromToUcsc -a hg38.chromAlias.tsv | bgzip -c > dbsnp_156.hg38.vcf.gz
+```
 
 https://gatk.broadinstitute.org/hc/en-us/articles/360035890811-Resource-bundle
 
 ```shell
 gsutil -m cp \
-  "gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf" \
-  "gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz" \
-  "gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz.tbi" \
-  "gs://genomics-public-data/resources/broad/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz" \
-  "gs://genomics-public-data/resources/broad/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz.tbi" \
+  gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz \
+  gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz.tbi \
+  gs://genomics-public-data/resources/broad/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz \
+  gs://genomics-public-data/resources/broad/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz.tbi \
   data/gatk
-```
-
-```shell
-bgzip -c Homo_sapiens_assembly38.dbsnp138.vcf > Homo_sapiens_assembly38.dbsnp138.vcf.gz
-tabix -p vcf Homo_sapiens_assembly38.dbsnp138.vcf.gz
 ```
 
 ### 1000G Reference panel
@@ -65,6 +71,7 @@ Put these tools in the `./bin` folder:
 
 - https://github.com/rwdavies/STITCH/blob/1.6.8/STITCH.R
 - https://github.com/Zilong-Li/BaseVarC
+- http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/chromToUcsc
 
 ### Create Conda Environment
 

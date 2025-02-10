@@ -94,7 +94,7 @@ rule Module_1_Recalibration_Step_1:
             --java-options "-Xmx{resources.mem_mb}m" \
             -R {params.ref} \
             -I {input.bam} \
-            --known-sites {params.gatk_bundle_dir}/Homo_sapiens_assembly38.dbsnp138.vcf.gz \
+            --known-sites {params.gatk_bundle_dir}/dbsnp_156.hg38.vcf.gz \
             --known-sites {params.gatk_bundle_dir}/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz \
             --known-sites {params.gatk_bundle_dir}/Homo_sapiens_assembly38.known_indels.vcf.gz \
             -O {output} 2>> {log}

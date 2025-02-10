@@ -1,6 +1,6 @@
-sample_list: data/nipt.sample.list
-file_pattern: data/reads/{sample_id}.R1.clean.fastq.gz
-name_pattern: "{sample_id}.R1.clean"
+sample_list: data/fq.list
+file_pattern: data/{sample_id}.fq.gz
+name_pattern: "{sample_id}"
 
 output_dir: output
 log_dir: log
