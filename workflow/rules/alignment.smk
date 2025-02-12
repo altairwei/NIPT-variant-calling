@@ -91,7 +91,7 @@ rule Module_1_Recalibration_Step_1:
     shell:
         """
         gatk BaseRecalibrator \
-            --java-options "-Xmx{resources.mem_mb}m" \
+            --java-options "-Xmx{resources.mem_mb}m -XX:ConcGCThreads=1" \
             -R {params.ref} \
             -I {input.bam} \
             --known-sites {params.gatk_bundle_dir}/dbsnp_156.hg38.vcf.gz \
@@ -117,6 +117,7 @@ rule Module_1_Recalibration_Step_2:
     shell:
         """
         gatk ApplyBQSR \
+            --java-options "-XX:ConcGCThreads=1" \
             -R {params.ref} \
             --bqsr-recal-file {input.tbl} \
             -I {input.bam} \
@@ -152,34 +153,4 @@ rule Module_1_ListSamples:
             for sample_id in SAMPLES:
                 f_sample.write(sample_id + "\n")
                 f_sex.write(sample_id + "\t" + "Female\n")
-
-
-rule Module_1_Statistics_Step_1:
-    """
-    Use Samtools to calculate alignment statistics for the alignment files.
-    """
-    input:
-        bam=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.BQSR.bam"),
-        bai=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.BQSR.bam.bai")
-    output:
-        os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.BQSR.bamstats")
-    log:
-        get_log_path("{sample_id}")
-    shell:
-        "samtools stats {input.bam} > {output} 2>> {log}"
-
-rule Module_1_Statistics_Step_2:
-    """
-    Use Bedtools to calculate alignment statistics for the alignment files.
-    """
-    input:
-        bam=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.BQSR.bam"),
-        bai=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.BQSR.bam.bai")
-    output:
-        bgzip=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.BQSR.cvg.bed.gz"),
-        tabix=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.BQSR.cvg.bed.gz.tbi")
-    log:
-        get_log_path("{sample_id}")
-    shell:
-        "bedtools genomecov -ibam {input.bam} -bga -split 2>> {log} | bgzip > {output.bgzip} && tabix -p bed {output.bgzip}"
 

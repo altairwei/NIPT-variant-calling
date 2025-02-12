@@ -20,7 +20,7 @@ Download the latest dbSNP:
 
 ```shell
 wget https://ftp.ncbi.nih.gov/snp/latest_release/VCF/GCF_000001405.40.gz{,.md5}
-md5sum -c GCF_000001405.40.gz*.md5
+md5sum -c GCF_000001405.40.gz.md5
 ```
 
 Convert contig IDs to UCSC using [chromToUcsc](http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/chromToUcsc):
@@ -28,6 +28,7 @@ Convert contig IDs to UCSC using [chromToUcsc](http://hgdownload.cse.ucsc.edu/ad
 ```shell
 chromToUcsc --get hg38
 gunzip -c GCF_000001405.40.gz | chromToUcsc -a hg38.chromAlias.tsv | bgzip -c > dbsnp_156.hg38.vcf.gz
+tabix -p vcf dbsnp_156.hg38.vcf.gz
 ```
 
 https://gatk.broadinstitute.org/hc/en-us/articles/360035890811-Resource-bundle

@@ -8,7 +8,8 @@ rule all:
 
 rule report:
     input:
-        os.path.join(OUTPUT_DIR, "report", "raw.multiqc.html")
+        #os.path.join(OUTPUT_DIR, "report", "raw.multiqc.html"),
+        os.path.join(OUTPUT_DIR, "report", "alignment.multiqc.html")
 
 ##### Modules #####
 
