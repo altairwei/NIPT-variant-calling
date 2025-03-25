@@ -10,11 +10,9 @@ rule Module_1_Alignment_Step_1:
         temp(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sai"))
     log:
         get_log_path("{sample_id}")
-    params:
-        ref=REF
     threads: 4
     shell:
-        "bwa aln -e 10 -t {threads} -i 5 -q 0 {params.ref} {input} > {output} 2>> {log}"
+        "bwa aln -e 10 -t {threads} -i 5 -q 0 {config[ref]} {input} > {output} 2>> {log}"
 
 rule Module_1_Alignment_Step_2:
     """
@@ -29,11 +27,10 @@ rule Module_1_Alignment_Step_2:
     log:
         get_log_path("{sample_id}")
     params:
-        ref=REF,
         read_group=f"@RG\\tID:{{sample_id}}\\tPL:{PLATFORM}\\tSM:{{sample_id}}"
     shell:
         """
-        bwa samse -r {params.read_group:q} {params.ref} {input.sai} {input.fq} 2>> {log} \
+        bwa samse -r {params.read_group:q} {config[ref]} {input.sai} {input.fq} 2>> {log} \
             | samtools view -h -Sb - > {output}
         """
 
@@ -82,22 +79,22 @@ rule Module_1_Recalibration_Step_1:
         bai=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.bam.bai")
     output:
         temp(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.recal_data.table"))
-    params:
-        **common_params
     resources:
         mem_mb=2*1024
     log:
         get_log_path("{sample_id}")
+    benchmark:
+        "benchmarks/gatk.BaseRecalibrator/{sample_id}.benchmark.txt"
     shell:
         """
         gatk BaseRecalibrator \
             --java-options "-Xmx{resources.mem_mb}m -XX:ConcGCThreads=1" \
-            -R {params.ref} \
+            -R {config[ref]} \
             -I {input.bam} \
-            --known-sites {params.gatk_bundle_dir}/dbsnp_156.hg38.vcf.gz \
-            --known-sites {params.gatk_bundle_dir}/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz \
-            --known-sites {params.gatk_bundle_dir}/Homo_sapiens_assembly38.known_indels.vcf.gz \
-            -O {output} 2>> {log}
+            --known-sites {config[dbSNP]} \
+            --known-sites {config[gatk_bundle_dir]}/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz \
+            --known-sites {config[gatk_bundle_dir]}/Homo_sapiens_assembly38.known_indels.vcf.gz \
+            -O {output} > {log} 2>&1
         """
 
 rule Module_1_Recalibration_Step_2:
@@ -110,18 +107,16 @@ rule Module_1_Recalibration_Step_2:
         bai=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.bam.bai")
     output:
         protected(os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.BQSR.bam"))
-    params:
-        **common_params
     log:
         get_log_path("{sample_id}")
     shell:
         """
         gatk ApplyBQSR \
             --java-options "-XX:ConcGCThreads=1" \
-            -R {params.ref} \
+            -R {config[ref]} \
             --bqsr-recal-file {input.tbl} \
             -I {input.bam} \
-            -O {output} 2>> {log}
+            -O {output} > {log} 2>&1
         """
 
 rule Module_1_PostRecalibration:

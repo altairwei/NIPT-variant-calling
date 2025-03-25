@@ -34,11 +34,12 @@ rule Module_3_RunSTITCH_Step_1:
         vcf=os.path.join(OUTPUT_DIR, "imputation", "{chr}", "{chr}_{start}_{end}", "stitch.{chr}.{start}.{end}.vcf.gz"),
         idx=os.path.join(OUTPUT_DIR, "imputation", "{chr}", "{chr}_{start}_{end}", "stitch.{chr}.{start}.{end}.vcf.gz.tbi")
     params:
-        ref=REF,
         region="--regionStart {start} --regionEnd {end} --chr {chr}",
         outdir=os.path.join(OUTPUT_DIR, "imputation", "{chr}", "{chr}_{start}_{end}")
     log:
         get_log_path("{chr}_{start}_{end}")
+    benchmark:
+        "benchmarks/STITCH.R/{chr}_{start}_{end}.benchmark.txt"
     shell:
         """
         ./bin/STITCH.R \
@@ -46,7 +47,7 @@ rule Module_3_RunSTITCH_Step_1:
             --bamlist {input.bamlist} \
             --sampleNames_file {input.snlist} \
             --posfile {input.posfile} \
-            --reference {params.ref} \
+            --reference {config[ref]} \
             --K 10 --nGen 16000 --nCores 1 \
             {params.region} \
             --buffer 250000 2> {log} >> {log}

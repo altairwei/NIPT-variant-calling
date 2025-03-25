@@ -11,7 +11,6 @@ rule Module_2_Calling_Step_2:
         tbi=os.path.join(OUTPUT_DIR, "calls", "{chr_id}", "{chr_id}_{start}_{end}", "basevar.{chr_id}_{start}_{end}.vcf.gz.tbi"),
         cvg=os.path.join(OUTPUT_DIR, "calls", "{chr_id}", "{chr_id}_{start}_{end}", "basevar.{chr_id}_{start}_{end}.cvg.gz")
     params:
-        ref=REF,
         region="{chr_id}:{start}-{end}",
         outprefix=os.path.join(OUTPUT_DIR, "calls", "{chr_id}", "{chr_id}_{start}_{end}", "basevar.{chr_id}_{start}_{end}")
     threads: 1 # Multiple threads will cause std::bad_alloc error.
@@ -23,11 +22,13 @@ rule Module_2_Calling_Step_2:
         mem_mb=4*1024
     log:
         get_log_path("{chr_id}_{start}_{end}")
+    benchmark:
+        "benchmarks/BaseVarC.basetype/{chr_id}_{start}_{end}.benchmark.txt"
     shell:
         """
         ./bin/BaseVarC basetype \
             --input {input} \
-            --reference {params.ref} \
+            --reference {config[ref]} \
             --region {params.region:q} \
             --output {params.outprefix} \
             --batch 200 \

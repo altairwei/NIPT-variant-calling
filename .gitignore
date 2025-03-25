@@ -1,7 +1,8 @@
 .vscode/
 .snakemake/
 data/
-output/
+output*/
 log/
 bin/
 tmp/
+benchmarks*/
