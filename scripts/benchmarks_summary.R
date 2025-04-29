@@ -105,9 +105,8 @@ if (raw_output) {
       # Retrieve description from mapping if available
       description <- if (!is.null(desc_map[[col]])) desc_map[[col]] else ""
       
-      stats <- rbind(stats, data.frame(
-                                       Description = description,
-                                       Formatted = formatted_value,
+      stats <- rbind(stats, data.frame(Description = description,
+                                       Average = formatted_value,
                                        stringsAsFactors = FALSE))
     }
   }

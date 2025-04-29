@@ -84,7 +84,7 @@ rule Module_1_Recalibration_Step_1:
     log:
         get_log_path("{sample_id}")
     benchmark:
-        "benchmarks/gatk.BaseRecalibrator/{sample_id}.benchmark.txt"
+        BENCH_DIR + "/gatk.BaseRecalibrator/{sample_id}.benchmark.txt"
     shell:
         """
         gatk BaseRecalibrator \
@@ -116,6 +116,7 @@ rule Module_1_Recalibration_Step_2:
             -R {config[ref]} \
             --bqsr-recal-file {input.tbl} \
             -I {input.bam} \
+            --create-output-bam-index false \
             -O {output} > {log} 2>&1
         """
 

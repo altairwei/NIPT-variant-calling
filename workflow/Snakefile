@@ -3,13 +3,16 @@ include: "rules/common.smk"
 rule all:
     input:
         os.path.join(OUTPUT_DIR, "report", "raw.multiqc.html"),
+        os.path.join(OUTPUT_DIR, "report", "alignment.multiqc.html"),
         os.path.join(OUTPUT_DIR, "imputation", "STITCH.vcf.gz"),
         os.path.join(OUTPUT_DIR, "calls", "BaseVarC.vcf.gz")
 
 rule report:
     input:
-        #os.path.join(OUTPUT_DIR, "report", "raw.multiqc.html"),
-        os.path.join(OUTPUT_DIR, "report", "alignment.multiqc.html")
+        os.path.join(OUTPUT_DIR, "report", "raw.multiqc.html"),
+        os.path.join(OUTPUT_DIR, "report", "alignment.multiqc.html"),
+        os.path.join(OUTPUT_DIR, "report", "alignment.cycle_quality_heatmap.png"),
+        os.path.join(OUTPUT_DIR, "report", "alignment.BQSR.cycle_quality_heatmap.png")
 
 ##### Modules #####
 

@@ -38,6 +38,7 @@ rule Module_1_Raw_MultiQC:
             --force \
             -o {params.outdir} \
             -n raw.multiqc.html \
+            --export \
             {params.searchdirs} > {log} 2> {log}
         """
 
@@ -49,7 +50,7 @@ rule Module_1_Statistics_Step_1:
         bam=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.BQSR.bam"),
         bai=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.BQSR.bam.bai")
     output:
-        temp(os.path.join(OUTPUT_DIR, "report", "alignment", "{sample_id}.sorted.rmdup.BQSR.bamstats"))
+        os.path.join(OUTPUT_DIR, "report", "alignment", "{sample_id}.sorted.rmdup.BQSR.bamstats")
     log:
         get_log_path("{sample_id}")
     shell:
@@ -90,3 +91,37 @@ rule Module_1_Alignment_MultiQC:
             --export \
             {params.searchdirs} > {log} 2> {log}
         """
+
+rule Module_1_Statistics_BeforeBQSR:
+    """
+    Use Samtools to calculate alignment statistics for the alignment files.
+    """
+    input:
+        bam=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.bam"),
+        bai=os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.bam.bai")
+    output:
+        temp(os.path.join(OUTPUT_DIR, "report", "alignment", "{sample_id}.sorted.rmdup.bamstats"))
+    log:
+        get_log_path("{sample_id}")
+    shell:
+        "samtools stats {input.bam} > {output} 2>> {log}"
+
+rule Module_1_Alignment_QualityDistribution_BeforeBQSR:
+    input:
+        expand(os.path.join(OUTPUT_DIR, "report", "alignment", "{sample_id}.sorted.rmdup.bamstats"), sample_id=SAMPLES)
+    output:
+        aggregated=os.path.join(OUTPUT_DIR, "report", "alignment.aggregated_ffq.tsv"),
+        line=os.path.join(OUTPUT_DIR, "report", "alignment.cycle_quality_line.png"),
+        heatmap=os.path.join(OUTPUT_DIR, "report", "alignment.cycle_quality_heatmap.png")
+    script:
+        "../scripts/PlotBamFFQ.py"
+
+rule Module_1_Alignment_QualityDistribution_BQSR:
+    input:
+        expand(os.path.join(OUTPUT_DIR, "report", "alignment", "{sample_id}.sorted.rmdup.BQSR.bamstats"), sample_id=SAMPLES)
+    output:
+        aggregated=os.path.join(OUTPUT_DIR, "report", "alignment.BQSR.aggregated_ffq.tsv"),
+        line=os.path.join(OUTPUT_DIR, "report", "alignment.BQSR.cycle_quality_line.png"),
+        heatmap=os.path.join(OUTPUT_DIR, "report", "alignment.BQSR.cycle_quality_heatmap.png")
+    script:
+        "../scripts/PlotBamFFQ.py"

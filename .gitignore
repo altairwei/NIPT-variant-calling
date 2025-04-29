@@ -1,6 +1,6 @@
 .vscode/
 .snakemake/
-data/
+data
 output*/
 log/
 bin/

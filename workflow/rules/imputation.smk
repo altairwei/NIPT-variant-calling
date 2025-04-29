@@ -39,7 +39,7 @@ rule Module_3_RunSTITCH_Step_1:
     log:
         get_log_path("{chr}_{start}_{end}")
     benchmark:
-        "benchmarks/STITCH.R/{chr}_{start}_{end}.benchmark.txt"
+        BENCH_DIR + "/STITCH.R/{chr}_{start}_{end}.benchmark.txt"
     shell:
         """
         ./bin/STITCH.R \

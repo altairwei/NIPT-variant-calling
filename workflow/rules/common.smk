@@ -9,6 +9,7 @@ FQLIST = config["sample_list"]
 PLATFORM=config["platform"]
 GATK_BUNDLE_DIR = config["gatk_bundle_dir"]
 REF = config["ref"]
+BENCH_DIR = config["benchmark_dir"]
 
 common_params = {
     "ref": REF,

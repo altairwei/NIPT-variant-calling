@@ -1,8 +1,9 @@
-sample_list: data/fq.list
-file_pattern: data/{sample_id}.fq.gz
-name_pattern: "{sample_id}"
+sample_list: data/nipt.sample200.list
+file_pattern: data/reads/{sample_id}.R1.clean.fastq.gz
+name_pattern: "{sample_id}.R1.clean"
 
-output_dir: output
+output_dir: output_dbsnp146
+benchmark_dir: benchmarks_dbsnp146
 log_dir: log
 
 # Please verify the platform that generated the sequencing files, as different
@@ -12,6 +13,7 @@ platform: ILLUMINA
 
 ref: data/hg38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
 ref_fai: data/hg38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai
+dbSNP: "data/gatk/dbsnp_146.hg38.vcf.gz"
 gatk_bundle_dir: data/gatk
 
 # The entire genome is divided into uniformly sized segments. Subsequently, 

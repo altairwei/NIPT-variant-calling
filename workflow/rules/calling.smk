@@ -23,7 +23,7 @@ rule Module_2_Calling_Step_2:
     log:
         get_log_path("{chr_id}_{start}_{end}")
     benchmark:
-        "benchmarks/BaseVarC.basetype/{chr_id}_{start}_{end}.benchmark.txt"
+        BENCH_DIR + "/BaseVarC.basetype/{chr_id}_{start}_{end}.benchmark.txt"
     shell:
         """
         ./bin/BaseVarC basetype \
