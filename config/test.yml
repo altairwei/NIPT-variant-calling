@@ -2,8 +2,8 @@ sample_list: data/nipt.sample200.list
 file_pattern: data/reads/{sample_id}.R1.clean.fastq.gz
 name_pattern: "{sample_id}.R1.clean"
 
-output_dir: output_dbsnp146
-benchmark_dir: benchmarks_dbsnp146
+output_dir: output
+benchmark_dir: benchmarks
 log_dir: log
 
 # Please verify the platform that generated the sequencing files, as different

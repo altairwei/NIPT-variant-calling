@@ -11,7 +11,12 @@ else
     echo "Environment nipt is already activated." 1>&2
 fi
 
-snakemake \
-    --rerun-triggers input mtime \
-    --cores all \
-    "$@"
+for (( i=$1; i<50; i++ ))
+do
+    snakemake \
+        --rerun-triggers input mtime \
+        --cores all \
+        --batch Module_1_Alignment_MultiQC=$i/50 \
+        --ri \
+        report
+done
