@@ -68,9 +68,9 @@ mv 1kGP_high_coverage_Illumina.chrX.filtered.SNV_INDEL_SV_phased_panel.v2.vcf.gz
 
 ### Download or Compile Tools
 
-Put these tools in the `./bin` folder:
+Put or compile these tools in the `./bin` folder:
 
-- https://github.com/rwdavies/STITCH/blob/1.6.8/STITCH.R
+- https://github.com/rwdavies/STITCH/blob/1.7.3/STITCH.R
 - https://github.com/Zilong-Li/BaseVarC
 - http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/chromToUcsc
 

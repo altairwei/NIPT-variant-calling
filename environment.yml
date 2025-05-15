@@ -5,24 +5,23 @@ channels:
   - https://repo.anaconda.com/pkgs/main
   - https://repo.anaconda.com/pkgs/r
 dependencies:
-  - bcftools=1.16=hfe4b78e_1
-  - bedtools=2.31.1=hf5e1c6e_2
-  - bwa=0.7.18=he4a0461_1
-  - cmake=3.25.1=h816a3e0_0
-  - fastp=0.23.4=h5f740d0_0
-  - fastqc=0.12.1=hdfd78af_0
-  - gatk4=4.3.0.0=py36hdfd78af_0
-  - htslib=1.16=h6bc39ce_0
-  - multiqc=1.19=pyhdfd78af_0
-  - python=3.11.0=h10a6764_1_cpython
-  - r-base=4.2.1=ha8c3e7c_1
-  - r-optparse=1.7.5=r42hc72bb7e_0
-  - r-stitch=1.6.8=r42h06b5641_1
-  - samtools=1.16.1=h6899075_1
-  - seqkit=2.9.0=h9ee0642_0
-  - snakemake=8.28.0=hdfd78af_0
-  - snakemake-interface-common=1.17.4=pyhdfd78af_0
-  - snakemake-interface-executor-plugins=9.3.3=pyhdfd78af_0
-  - snakemake-interface-report-plugins=1.1.0=pyhdfd78af_0
-  - snakemake-interface-storage-plugins=3.3.0=pyhdfd78af_0
-  - snakemake-minimal=8.28.0=pyhdfd78af_0
+  - bcftools=1.21
+  - bedtools=2.31.1
+  - bwa=0.7.18
+  - cmake=3.25.1
+  - fastp=0.23.4
+  - fastqc=0.12.1
+  - gatk4=4.3.0.0
+  - multiqc=1.19
+  - python=3.11.0
+  - r-base=4.4
+  - r-optparse=1.7.5
+  - r-stitch=1.7.3
+  - samtools=1.21
+  - seqkit=2.9.0
+  - snakemake=8.28.0
+  - snakemake-interface-common=1.17.4
+  - snakemake-interface-executor-plugins=9.3.3
+  - snakemake-interface-report-plugins=1.1.0
+  - snakemake-interface-storage-plugins=3.3.0
+  - snakemake-minimal=8.28.0
