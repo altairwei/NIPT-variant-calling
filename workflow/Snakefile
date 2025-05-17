@@ -5,7 +5,7 @@ rule all:
         os.path.join(OUTPUT_DIR, "report", "raw.multiqc.html"),
         os.path.join(OUTPUT_DIR, "report", "alignment.multiqc.html"),
         os.path.join(OUTPUT_DIR, "imputation", "STITCH.vcf.gz"),
-        os.path.join(OUTPUT_DIR, "calls", "BaseVarC.vcf.gz")
+        os.path.join(OUTPUT_DIR, "calls", "BaseVar.vcf.gz")
 
 rule report:
     input:

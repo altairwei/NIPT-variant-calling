@@ -1,7 +1,7 @@
 rule Module_4_RunPCA:
     input:
-        vcf=os.path.join(OUTPUT_DIR, "calls", "BaseVarC.vcf.gz"),
-        tbi=os.path.join(OUTPUT_DIR, "calls", "BaseVarC.vcf.gz.tbi"),
+        vcf=os.path.join(OUTPUT_DIR, "calls", "BaseVar.vcf.gz"),
+        tbi=os.path.join(OUTPUT_DIR, "calls", "BaseVar.vcf.gz.tbi"),
         sexlist=os.path.join(OUTPUT_DIR, "all.samplesex.list")
     output:
         os.path.join(OUTPUT_DIR, "GWAS", "gwas.pca")

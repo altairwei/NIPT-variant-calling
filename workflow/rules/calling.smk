@@ -26,15 +26,15 @@ rule Module_2_Calling_Step_2:
         BENCH_DIR + "/BaseVarC.basetype/{chr_id}_{start}_{end}.benchmark.txt"
     shell:
         """
-        ./bin/BaseVarC basetype \
-            --input {input} \
-            --reference {config[ref]} \
-            --region {params.region:q} \
-            --output {params.outprefix} \
-            --batch 200 \
-            --thread {threads} > {log} 2> {log}
-        
-        tabix -p vcf {output.vcf}
+        ./bin/basevar basetype \
+            -t {threads} \
+            -L {input} \
+            --filename-has-samplename \
+            -R {config[ref]} \
+            -r {params.region:q} \
+            --min-af=0.001 \
+            --output-vcf {output.vcf} \
+            --output-cvg {output.cvg} > {log} 2> {log}
         """
 
 CHROM_SEGMENTS_BASEVAR=list(generate_chromosome_segments(exclude=False))
@@ -48,8 +48,8 @@ rule Module_2_Calling_Step_3:
                 f"{chr_id}", f"{chr_id}_{start}_{end}", f"basevar.{chr_id}_{start}_{end}.vcf.gz.tbi")
                     for chr_id, start, end in CHROM_SEGMENTS_BASEVAR]
     output:
-        vcf=protected(os.path.join(OUTPUT_DIR, "calls", "BaseVarC.vcf.gz")),
-        tbi=protected(os.path.join(OUTPUT_DIR, "calls", "BaseVarC.vcf.gz.tbi"))
+        vcf=protected(os.path.join(OUTPUT_DIR, "calls", "BaseVar.vcf.gz")),
+        tbi=protected(os.path.join(OUTPUT_DIR, "calls", "BaseVar.vcf.gz.tbi"))
     threads: 12
     log: get_log_path("bcftools_concat_basevar")
     shell:
