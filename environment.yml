@@ -25,3 +25,4 @@ dependencies:
   - snakemake-interface-report-plugins=1.1.0
   - snakemake-interface-storage-plugins=3.3.0
   - snakemake-minimal=8.28.0
+  - snakemake-executor-plugin-slurm
