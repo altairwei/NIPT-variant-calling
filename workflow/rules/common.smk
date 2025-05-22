@@ -1,8 +1,21 @@
-import datetime
-
-timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+import json, datetime, pathlib
 
 configfile: "config/config.yml"
+
+stamp = pathlib.Path(".run_ts.json")
+if stamp.exists():
+    RUN_TS = json.loads(stamp.read_text())["run_ts"]
+else:
+    RUN_TS = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    stamp.write_text(json.dumps({"run_ts": RUN_TS}))
+
+onsuccess:
+    stamp.unlink(missing_ok=True)
+
+onerror:
+    stamp.unlink(missing_ok=True)
+
+config["run_ts"] = RUN_TS
 
 OUTPUT_DIR = config["output_dir"]
 FQLIST = config["sample_list"]
@@ -23,7 +36,7 @@ wildcard_constraints:
     chrom="chr.+"
 
 def get_log_path(sample_id):
-    return os.path.join(config["log_dir"], timestamp, f"{sample_id}.log")
+    return os.path.join(config["log_dir"], config["run_ts"], f"{sample_id}.log")
 
 def get_samples(fqlist_path):
     samples = []

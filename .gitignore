@@ -6,3 +6,5 @@ log/
 bin/
 tmp/
 benchmarks*/
+
+.run_ts.json
