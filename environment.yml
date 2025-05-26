@@ -17,6 +17,7 @@ dependencies:
   - r-base=4.4
   - r-optparse=1.7.5
   - r-stitch=1.7.3
+  - r-tidyverse=2
   - samtools=1.21
   - seqkit=2.9.0
   - snakemake=8.28.0

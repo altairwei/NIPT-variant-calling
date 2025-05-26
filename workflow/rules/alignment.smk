@@ -138,8 +138,8 @@ rule Module_1_ListSamples:
         bai=expand(os.path.join(OUTPUT_DIR, "alignments",
             "{sample_id}.sorted.rmdup.BQSR.bam.bai"), sample_id=SAMPLES)
     output:
-        bamlist=temp(os.path.join(OUTPUT_DIR, "all.bam.list")),
-        snlist=temp(os.path.join(OUTPUT_DIR, "all.samplename.list")),
+        bamlist=os.path.join(OUTPUT_DIR, "all.bam.list"),
+        snlist=os.path.join(OUTPUT_DIR, "all.samplename.list"),
         sexlist=os.path.join(OUTPUT_DIR, "all.samplesex.list")
     run:
         with open(output.bamlist, "w") as f_bam:

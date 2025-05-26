@@ -49,7 +49,7 @@ def get_samples(fqlist_path):
 
 SAMPLES = get_samples(FQLIST)
 
-def generate_chromosome_segments(exclude=True):
+def generate_chromosome_segments(exclude=True, chroms = [f"chr{i}" for i in range(1, 23)] + ["chrX"]):
     """
     Generate chromosome segments as (chr_id, start, end) tuples, excluding specified regions.
 
@@ -66,9 +66,6 @@ def generate_chromosome_segments(exclude=True):
     delta = config["chunk_size"]
     in_fai = config["ref_fai"]
     exclude_regions = config["exclude_regions"] if exclude else None
-
-    # Include all chromosomes
-    chroms = [f"chr{i}" for i in range(1, 23)] + ["chrX"]
 
     # Parse exclude_regions into a dictionary for quick lookup
     exclude_dict = {}

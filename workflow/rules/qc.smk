@@ -125,3 +125,21 @@ rule Module_1_Alignment_QualityDistribution_BQSR:
         heatmap=os.path.join(OUTPUT_DIR, "report", "alignment.BQSR.cycle_quality_heatmap.png")
     script:
         "../scripts/PlotBamFFQ.py"
+
+rule Module_1_Variant_Calling_Imputation_Summary:
+    input:
+        Variants=expand(os.path.join(OUTPUT_DIR, "calls", "{chr_id}", "BaseVar.{chr_id}.pos.txt"),
+            chr_id=[f"chr{i}" for i in range(1, 23)] + ["chrX"]),
+        Preimputation=expand(os.path.join(OUTPUT_DIR, "preimputation", "{chr_id}", "stitch.preimputation.{chr_id}.pos.txt"),
+            chr_id=[f"chr{i}" for i in range(1, 23)] + ["chrX"]),
+        Imputation=expand(os.path.join(OUTPUT_DIR, "imputation", "{chr_id}", "STITCH.imputation.{chr_id}.pos.txt"),
+            chr_id=[f"chr{i}" for i in range(1, 23)] + ["chrX"])
+    output:
+        RData=os.path.join(OUTPUT_DIR, "report", "imputation", "ImputationStats.RData"),
+        ImputationPositions=os.path.join(OUTPUT_DIR, "imputation", "ImputationPositions.tsv"),
+        ImputationSummary=os.path.join(OUTPUT_DIR, "report", "imputation", "ImputationSummary.tsv"),
+        ImputationChromSummary=os.path.join(OUTPUT_DIR, "report", "imputation", "ImputationChromSummary.tsv")
+    log:
+        get_log_path("Module_1_Variant_Calling_Imputation_Summary")
+    script:
+        "../scripts/ImputationStats.R"

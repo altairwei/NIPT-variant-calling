@@ -48,8 +48,8 @@ rule Module_2_Calling_Step_3:
                 f"{chr_id}", f"{chr_id}_{start}_{end}", f"basevar.{chr_id}_{start}_{end}.vcf.gz.tbi")
                     for chr_id, start, end in CHROM_SEGMENTS_BASEVAR]
     output:
-        vcf=protected(os.path.join(OUTPUT_DIR, "calls", "BaseVar.vcf.gz")),
-        tbi=protected(os.path.join(OUTPUT_DIR, "calls", "BaseVar.vcf.gz.tbi"))
+        vcf=os.path.join(OUTPUT_DIR, "calls", "BaseVar.vcf.gz"),
+        tbi=os.path.join(OUTPUT_DIR, "calls", "BaseVar.vcf.gz.tbi")
     threads: 12
     log: get_log_path("bcftools_concat_basevar")
     shell:
@@ -61,4 +61,23 @@ rule Module_2_Calling_Step_3:
             {input.vcf} 2> {log}
 
         tabix -p vcf {output.vcf}
+        """
+
+rule Module_2_Generate_BaseVar_Posfile:
+    """
+    These position files were used in the two-stage approach of STITCH imputation.
+    We don't do any filtration, because the first round of STITCH imputation will
+    filter SNPs directly.
+    """
+    input:
+        os.path.join(OUTPUT_DIR, "calls", "BaseVar.vcf.gz")
+    output:
+        os.path.join(OUTPUT_DIR, "calls", "{chr_id}", "BaseVar.{chr_id}.pos.txt")
+    params:
+        scr=r'{if(pre!=$2 && length($4) ==1 && length($5) ==1 && $4~/^[ACGT]$/ && $5~/^[ACGT]$/){print $1"\t"$2"\t"$4"\t"$5} pre=$2}'
+    log:
+        get_log_path("Module_2_Concat_BaseVar_Posfiles_{chr_id}")
+    shell:
+        """
+        bcftools norm -r {wildcards.chr_id} --force -m- {input} 2> {log} | grep -v "#" | awk '{params.scr}' > {output}
         """

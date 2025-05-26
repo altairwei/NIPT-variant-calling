@@ -28,11 +28,12 @@ chunk_size: 5000000
 # Skip positions in these chromosomal regions because there are no SNPs in these
 # regions according to the 1000G reference panel.
 exclude_regions:
+  - chr1:130000001-140000000
+  - chr9:50000001-60000000
+  - chr13:1-15000000
+  - chr14:1-15000000
+  - chr15:1-15000000
+  - chr16:40000001-45000000
   - chr21:1-5000000
   - chr22:1-10000000
-  - chr9:50000001-60000000
-  - chr16:40000001-45000000
-  - chr14:1-15000000
-  - chr1:130000001-140000000
-  - chr15:1-15000000
-  - chr13:1-15000000
+
