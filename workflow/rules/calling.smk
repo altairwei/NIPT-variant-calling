@@ -19,7 +19,7 @@ rule Module_2_Calling_Step_2:
         # only 3GB to 4GB of memory if the -B (--batch-count)
         # parameter is set to 200.
         # See https://github.com/ShujiaHuang/basevar/issues/14
-        mem_mb=4*1024
+        mem_mb=2*1024
     log:
         get_log_path("{chr_id}_{start}_{end}")
     benchmark:

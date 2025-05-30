@@ -1,9 +1,9 @@
-rule Module_3_GeneratePosfile:
+rule Module_3_RefPanel_GeneratePosfile:
     input:
         "data/refpanel/20220422_3202_phased_SNV_INDEL_SV/"
         "1kGP_high_coverage_Illumina.{chr}.filtered.SNV_INDEL_SV_phased_panel.vcf.gz"
     output:
-        os.path.join(OUTPUT_DIR, "imputation", "{chr}", "Panel.{chr}.pos.txt")
+        os.path.join(OUTPUT_DIR, "preimputation", "{chr}", "Panel.{chr}.pos.txt")
     params:
         scr=r'{if(pre!=$2 && length($4) ==1 && length($5) ==1 ){print $1"\t"$2"\t"$4"\t"$5} pre=$2}'
     shell:
@@ -11,14 +11,16 @@ rule Module_3_GeneratePosfile:
         zcat {input} | grep -v "#" | awk '{params.scr}' > {output}
         """
 
-rule Module_3_ConcatPosfiles:
+rule Module_3_UnionPosfiles:
     input:
-        expand(os.path.join(OUTPUT_DIR, "imputation", "{chrom}", "Panel.{chrom}.pos.txt"),
-            chrom=[f"chr{i}" for i in range(1, 23)] + ["chrX"])
+        BaseVar=os.path.join(OUTPUT_DIR, "calls", "{chr}", "BaseVar.{chr}.pos.txt"),
+        RefPanel=os.path.join(OUTPUT_DIR, "preimputation", "{chr}", "Panel.{chr}.pos.txt")
     output:
-        os.path.join(OUTPUT_DIR, "imputation", "Panel.allchrom.pos.txt")
-    shell:
-        "cat {input} > {output}"
+        posfile=os.path.join(OUTPUT_DIR, "preimputation", "{chr}", "Union.{chr}.pos.txt")
+    log:
+        get_log_path("Module_3_UnionPosfiles_{chr}")
+    script:
+        "../scripts/UnionPosfiles.R"
 
 rule Module_3_STITCH_PreImputation_Step_1:
     """
@@ -31,13 +33,14 @@ rule Module_3_STITCH_PreImputation_Step_1:
     input:
         bamlist=os.path.join(OUTPUT_DIR, "all.bam.list"),
         snlist=os.path.join(OUTPUT_DIR, "all.samplename.list"),
-        posfile=os.path.join(OUTPUT_DIR, "calls", "{chr}", "BaseVar.{chr}.pos.txt")
+        posfile=os.path.join(OUTPUT_DIR, "preimputation", "{chr}", "Union.{chr}.pos.txt")
     output:
         vcf=os.path.join(OUTPUT_DIR, "preimputation", "{chr}", "{chr}_{start}_{end}", "stitch.{chr}.{start}.{end}.vcf.gz"),
         idx=os.path.join(OUTPUT_DIR, "preimputation", "{chr}", "{chr}_{start}_{end}", "stitch.{chr}.{start}.{end}.vcf.gz.tbi")
     params:
         region="--regionStart {start} --regionEnd {end} --chr {chr}",
         outdir=os.path.join(OUTPUT_DIR, "preimputation", "{chr}", "{chr}_{start}_{end}")
+    threads: 4
     log:
         get_log_path("{chr}_{start}_{end}")
     benchmark:
@@ -45,12 +48,13 @@ rule Module_3_STITCH_PreImputation_Step_1:
     shell:
         """
         ./bin/STITCH.R \
+            --nCores {threads} \
             --outputdir {params.outdir} \
             --bamlist {input.bamlist} \
             --sampleNames_file {input.snlist} \
             --posfile {input.posfile} \
             --reference {config[ref]} \
-            --K 10 --nGen 16000 --nCores 1 \
+            --K 10 --nGen 16000 \
             {params.region} \
             --buffer 250000 2> {log} >> {log}
 
@@ -93,6 +97,7 @@ rule Module_3_RunSTITCH_Step_1:
     params:
         region="--regionStart {start} --regionEnd {end} --chr {chr}",
         outdir=os.path.join(OUTPUT_DIR, "imputation", "{chr}", "{chr}_{start}_{end}")
+    threads: 4
     log:
         get_log_path("{chr}_{start}_{end}")
     benchmark:
@@ -100,12 +105,13 @@ rule Module_3_RunSTITCH_Step_1:
     shell:
         """
         ./bin/STITCH.R \
+            --nCores {threads} \
             --outputdir {params.outdir} \
             --bamlist {input.bamlist} \
             --sampleNames_file {input.snlist} \
             --posfile {input.posfile} \
             --reference {config[ref]} \
-            --K 10 --nGen 16000 --nCores 1 \
+            --K 10 --nGen 16000 \
             {params.region} \
             --buffer 250000 2> {log} >> {log}
         
