@@ -150,3 +150,24 @@ rule Module_1_ListSamples:
                 f_sample.write(sample_id + "\n")
                 f_sex.write(sample_id + "\t" + "Female\n")
 
+rule Module_1_Convert_BAM_To_CRAM:
+    """
+    Create a list of all the bam files.
+    """
+    input:
+        os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.BQSR.bam")
+    output:
+        os.path.join(OUTPUT_DIR, "alignments", "{sample_id}.sorted.rmdup.BQSR.cram")
+    shell:
+        "samtools view -O cram,archive -T {config[ref]} -o {output} {input}"
+
+rule Module_1_ListCRAM:
+    input:
+        cram=expand(os.path.join(OUTPUT_DIR, "alignments", 
+            "{sample_id}.sorted.rmdup.BQSR.cram"), sample_id=SAMPLES)
+    output:
+        cramlist=os.path.join(OUTPUT_DIR, "all.cram.list")
+    run:
+        with open(output.cramlist, "w") as f_cram:
+            for cram_file in input.cram:
+                f_cram.write(cram_file + "\n")
